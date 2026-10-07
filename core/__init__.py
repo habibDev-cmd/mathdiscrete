@@ -8,12 +8,13 @@ from .logic import (
     TruthTableResult,
     TruthTableRow,
 )
-from .combinatorics import CombinatoricsSolver
+from .combinatorics import CalculationResult, CombinatoricsSolver
 from .graphs import AdjacencyMatrixResult, GraphSolver, ShortestPathResult
 from .sets_theory import SetTheorySolver
 
 __all__ = [
     "AdjacencyMatrixResult",
+    "CalculationResult",
     "CombinatoricsSolver",
     "GraphSolver",
     "LogicClassification",

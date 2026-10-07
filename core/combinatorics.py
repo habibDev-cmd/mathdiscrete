@@ -5,24 +5,58 @@ from __future__ import annotations
 import itertools
 import math
 from collections.abc import Iterable, Iterator
+from dataclasses import dataclass
 from typing import TypeVar
 
 
 Element = TypeVar("Element")
 
 
+@dataclass
+class CalculationResult:
+    """Detailed calculation steps and the final integer result."""
+
+    steps: list[str]
+    result: int
+
+
 class CombinatoricsSolver:
     """Calculate common combinatorics quantities and enumerate outcomes."""
 
-    def permutations(self, n: int, r: int) -> int:
-        """Return the number of ordered selections of r items from n items."""
+    def permutation(self, n: int, r: int) -> CalculationResult:
+        """Return the number of ordered selections with LaTeX working steps."""
         self._validate_selection(n, r)
-        return math.perm(n, r)
+        result = math.perm(n, r)
+        expanded_terms = self._descending_product(n, r)
+        steps = [
+            r"P(n, r) = \frac{n!}{(n-r)!}",
+            rf"P({n}, {r}) = \frac{{{n}!}}{{({n}-{r})!}} = "
+            rf"\frac{{{n}!}}{{{n - r}!}}",
+            rf"P({n}, {r}) = {expanded_terms} = {result}",
+        ]
+        return CalculationResult(steps=steps, result=result)
 
-    def combinations(self, n: int, r: int) -> int:
-        """Return the number of unordered selections of r items from n items."""
+    def combination(self, n: int, r: int) -> CalculationResult:
+        """Return the number of unordered selections with LaTeX working steps."""
         self._validate_selection(n, r)
-        return math.comb(n, r)
+        result = math.comb(n, r)
+        numerator = self._descending_product(n, r)
+        denominator = self._descending_product(r, r)
+        steps = [
+            r"C(n, r) = \frac{n!}{r!(n-r)!}",
+            rf"C({n}, {r}) = \frac{{{n}!}}{{{r}!({n}-{r})!}} = "
+            rf"\frac{{{n}!}}{{{r}!{n - r}!}}",
+            rf"C({n}, {r}) = \frac{{{numerator}}}{{{denominator}}} = {result}",
+        ]
+        return CalculationResult(steps=steps, result=result)
+
+    def permutations(self, n: int, r: int) -> CalculationResult:
+        """Backward-compatible plural alias for :meth:`permutation`."""
+        return self.permutation(n, r)
+
+    def combinations(self, n: int, r: int) -> CalculationResult:
+        """Backward-compatible plural alias for :meth:`combination`."""
+        return self.combination(n, r)
 
     def factorial(self, n: int) -> int:
         """Return n factorial for a non-negative integer n."""
@@ -64,6 +98,13 @@ class CombinatoricsSolver:
         self._validate_non_negative_integer(r, "r")
         if r > n:
             raise ValueError("r must not be greater than n.")
+
+    @staticmethod
+    def _descending_product(value: int, count: int) -> str:
+        """Format the first ``count`` descending factors starting at value."""
+        if count == 0:
+            return "1"
+        return r" \times ".join(str(factor) for factor in range(value, value - count, -1))
 
     @staticmethod
     def _validate_non_negative_integer(

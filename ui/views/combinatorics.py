@@ -37,15 +37,24 @@ def render() -> None:
         if submitted:
             try:
                 result = (
-                    solver.permutations(int(n), int(r))
+                    solver.permutation(int(n), int(r))
                     if method == "Permutation"
-                    else solver.combinations(int(n), int(r))
+                    else solver.combination(int(n), int(r))
                 )
             except (TypeError, ValueError) as error:
                 st.error(str(error))
             else:
                 notation = "P" if method == "Permutation" else "C"
-                st.success(f"{notation}({int(n)}, {int(r)}) = {result:,}")
+                with st.container(border=True):
+                    st.subheader("Worked solution")
+                    for step_number, step in enumerate(result.steps, start=1):
+                        st.markdown(f"**Step {step_number}**")
+                        st.latex(step)
+
+                st.success(
+                    f"Final result: {notation}({int(n)}, {int(r)}) = {result.result:,}",
+                    icon=":material/check_circle:",
+                )
 
     with factorial_tab:
         st.subheader("Factorial")
